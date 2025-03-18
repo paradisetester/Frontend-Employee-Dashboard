@@ -1,25 +1,66 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Layout from './components/Layout'; // Employee Dashboard for authenticated users
+import PublicLayout from './components/Frontend/Layout'; // PublicLayout component
+import Login from './components/Login';
+import PrivateRoute from './utils/PrivateRoute';
+import SocketProvider from './services/SocketContext';
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
+import { getToken, isTokenExpired, logout } from './services/authService';
 
-function App() {
+const TokenExpirationHandler = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const token = getToken();
+      if (token && isTokenExpired(token)) {
+        logout();
+        navigate('/login');
+      }
+    };
+
+    checkTokenExpiration();
+    const intervalId = setInterval(checkTokenExpiration, 60000); // Check every minute
+    return () => clearInterval(intervalId);
+  }, [navigate]);
+
+  return null;
+};
+
+const AppRoutes = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <SocketProvider>
+      <TokenExpirationHandler />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        {/* Public routes */}
+        <Route path="/frontend/*" element={<PublicLayout />} />
+
+        {/* Private routes */}
+        <Route
+          path="/*"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        />
+      </Routes>
+    </SocketProvider>
   );
-}
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppRoutes />
+    </Router>
+  );
+};
 
 export default App;
