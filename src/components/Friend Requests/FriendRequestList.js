@@ -42,8 +42,8 @@ const FriendRequests = () => {
     setLoadingRequests(true);
     try {
       const data = await api.getRequests(user.id);
-      const friendlistdata=api.getFriendList(user.id);
-      console.log(friendlistdata);
+      // const friendlistdata=api.getFriendList(user.id);
+      // console.log(friendlistdata);
       setRequests(data.requests || data);
     } catch (error) {
       console.error('Error fetching friend requests:', error);
@@ -58,8 +58,6 @@ const FriendRequests = () => {
     setGlobalFilterValue(value);
   };
 
-  // Accept friend request using provided API endpoints
-// Accept friend request using provided API endpoints
 const handleAccept = async (requestId, senderId) => {
   setProcessingRequest(requestId);
   try {
