@@ -29,6 +29,7 @@ import ChatApp from './Chat/ChatApp';
 import EmployeeDashboard from './EmployeeDashboard';
 import FriendChatSystem from './Friend Requests/FriendChatSystem';
 import HomePage from './Frontend/Home/HomePage';
+import FriendList from './Friend Requests/FriendList';
 
 const Header = ({ toggleMobileMenu }) => {
   return (
@@ -99,6 +100,7 @@ const Layout = () => {
                 <Route path="/send-request" element={<AddFriendList />} />
                 <Route path="/friend-requests" element={<FriendRequests />} />
                 <Route path="/chat" element={<FriendChatSystem />} />
+                <Route path='/friends' element={<FriendList />} />
 
                 {/* Projects & Tasks */}
                 <Route path="/project-list" element={<ProjectList />} />

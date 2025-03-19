@@ -80,6 +80,7 @@ const Menu = ({ mobileMenuOpen, toggleMobileMenu }) => {
       items: [
         { path: '/send-request', label: 'Send Request' },
         { path: '/friend-requests', label: 'Friend Requests' },
+        { path: '/friends', label: 'Friends' },
         { path: '/chat', label: 'Chat' },
       ],
     },
