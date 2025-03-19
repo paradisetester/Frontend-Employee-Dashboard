@@ -130,7 +130,7 @@ const BlogsList = () => {
         </button>
         <div className="relative">
           <img
-            src={`http://localhost:5000${selectedBlog.featuredImage || '/uploads/placeholder.png'}`}
+            src={selectedBlog.featuredImage}
             alt={selectedBlog.title}
             className="w-full h-80 object-cover rounded-lg mb-6"
           />
@@ -204,7 +204,7 @@ const BlogsList = () => {
           >
             <div className="relative">
               <img
-                src={`http://localhost:5000${blog.featuredImage || '/uploads/placeholder.png'}`}
+                src={blog.featuredImage}
                 alt={blog.title}
                 className="w-full h-60 object-cover rounded-lg mb-4"
               />

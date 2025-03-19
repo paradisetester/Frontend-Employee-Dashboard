@@ -52,7 +52,7 @@ const AboutPage = () => {
       <div className="flex flex-col items-center mb-8">
         {about.mainImage && (
           <img
-            src={`http://localhost:5000${about.mainImage}`}
+            src={about.mainImage}
             alt="Main"
             className="w-full max-h-96 object-cover rounded mb-4"
           />
@@ -97,7 +97,7 @@ const AboutPage = () => {
                   <div className="flex items-center mb-4">
                     {testimonial.image && (
                       <img
-                        src={`http://localhost:5000${testimonial.image}`}
+                        src={testimonial.image}
                         alt={testimonial.name}
                         className="w-16 h-16 rounded-full object-cover mr-4"
                       />
@@ -128,7 +128,7 @@ const AboutPage = () => {
                 >
                   {exp.image && (
                     <img
-                      src={`http://localhost:5000${exp.image}`}
+                      src={exp.image}
                       alt={exp.projectName}
                       className="w-full h-56 object-cover rounded mb-4"
                     />
@@ -155,7 +155,7 @@ const AboutPage = () => {
                 >
                   {member.image && (
                     <img
-                      src={`http://localhost:5000${member.image}`}
+                      src={member.image}
                       alt={member.name}
                       className="w-24 h-24 rounded-full object-cover mb-4"
                     />
@@ -182,7 +182,7 @@ const AboutPage = () => {
                 >
                   {milestone.image && (
                     <img
-                      src={`http://localhost:5000${milestone.image}`}
+                      src={milestone.image}
                       alt={milestone.title}
                       className="w-24 h-24 object-cover rounded mb-4 md:mb-0 md:mr-6"
                     />

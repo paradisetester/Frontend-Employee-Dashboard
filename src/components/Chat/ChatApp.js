@@ -18,7 +18,7 @@ const ChatApp = () => {
       </div>
 
       {/* Chat Messaging Area */}
-      <div className="w-full md:w-2/3 p-4 flex items-center justify-left">
+      <div className="w-full md:w-2/3 p-4 items-center justify-left">
         {selectedRoom ? (
           <ChatMessaging selectedRoom={selectedRoom} />
         ) : (

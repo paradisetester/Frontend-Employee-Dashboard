@@ -13,14 +13,16 @@ const ChatRoomList = ({ onJoinRoom }) => {
   const [roomsPerPage] = useState(5); // Limit the number of rooms per page
   const socket = useSocket();
 
-  // Function to fetch rooms from API
+  // Function to fetch rooms from API and filter out private rooms
   const fetchRooms = async () => {
     try {
       const token = getToken();
       const decodedToken = jwtDecode(token);
       const employeeId = decodedToken.id;
       const data = await api.getRooms(employeeId);
-      setRooms(data);
+      // Filter out rooms where type is 'private'
+      const nonPrivateRooms = data.filter(room => room.type !== 'private');
+      setRooms(nonPrivateRooms);
     } catch (error) {
       console.error('Error fetching rooms:', error);
     }
@@ -80,7 +82,7 @@ const ChatRoomList = ({ onJoinRoom }) => {
               key={room._id}
               className="flex items-center justify-between border border-gray-300 rounded-md px-3 py-2 cursor-pointer hover:bg-gray-100"
               onClick={() => {
-                onJoinRoom({ id: room._id, name: room.name, members:room.members });
+                onJoinRoom({ id: room._id, name: room.name, members: room.members });
               }}
             >
               <div className="flex items-center space-x-2">

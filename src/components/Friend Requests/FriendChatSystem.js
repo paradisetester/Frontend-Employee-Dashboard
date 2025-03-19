@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../../services/SocketContext';
 import api from '../../services/axios';
 import { getToken } from '../../services/authService';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from 'primereact/button';
 import { Editor } from 'primereact/editor';
@@ -31,25 +31,19 @@ const FriendList = ({ userId, onSelectFriend, selectedFriendId }) => {
       }
     };
 
-    if (userId) {
-      fetchFriendList();
-    }
+    if (userId) fetchFriendList();
   }, [userId]);
 
-  const getFriendIdString = (friend) => {
-    if (friend && friend._id) {
-      return friend._id.toString();
-    }
-    return friend.toString();
-  };
+  const getFriendIdString = (friend) =>
+    friend && friend._id ? friend._id.toString() : friend.toString();
 
   return (
-    <div className="friend-list p-4">
-      <h3 className="mb-4">Your Friends</h3>
+    <div className="friend-list p-4 bg-white shadow-md rounded-lg">
+      <h3 className="mb-4 text-lg font-bold text-gray-800">Your Friends</h3>
       {loading ? (
         <ProgressSpinner />
       ) : friends.length === 0 ? (
-        <p>No friends found.</p>
+        <p className="text-gray-500">No friends found.</p>
       ) : (
         <ul className="space-y-2">
           {friends.map((friend) => {
@@ -57,9 +51,10 @@ const FriendList = ({ userId, onSelectFriend, selectedFriendId }) => {
             return (
               <li
                 key={friendIdStr}
-                className={`cursor-pointer p-2 rounded ${
-                  selectedFriendId === friendIdStr ? 'bg-blue-200' : 'hover:bg-blue-100'
-                }`}
+                className={`cursor-pointer p-2 rounded transition-colors ${selectedFriendId === friendIdStr
+                    ? 'bg-blue-200'
+                    : 'hover:bg-blue-100'
+                  }`}
                 onClick={() =>
                   onSelectFriend({
                     id: friendIdStr,
@@ -80,7 +75,6 @@ const FriendList = ({ userId, onSelectFriend, selectedFriendId }) => {
 // ------------------------
 // PrivateChatWindow Component
 // ------------------------
-// This component uses the room-based API to fetch messages and send messages to a private room.
 const PrivateChatWindow = ({ user, friend, room }) => {
   const socket = useSocket();
   const [messages, setMessages] = useState([]);
@@ -88,15 +82,25 @@ const PrivateChatWindow = ({ user, friend, room }) => {
   const [loading, setLoading] = useState(true);
   const [typing, setTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const renderHeader = () => {
+    return (
+      <span className="ql-formats">
+        <button className="ql-bold" aria-label="Bold"></button>
+        <button className="ql-italic" aria-label="Italic"></button>
+        <button className="ql-underline" aria-label="Underline"></button>
+      </span>
+    );
+  };
 
-  // Join the chatroom when the component mounts
+  const header = renderHeader();
+  // Join the room on mount
   useEffect(() => {
     if (socket && room._id) {
       socket.emit('joinRoom', room._id);
     }
   }, [socket, room._id]);
 
-  // Fetch room messages using the room ID
+  // Fetch messages for this room
   useEffect(() => {
     const fetchRoomMessages = async () => {
       try {
@@ -109,9 +113,7 @@ const PrivateChatWindow = ({ user, friend, room }) => {
       }
     };
 
-    if (room._id) {
-      fetchRoomMessages();
-    }
+    if (room._id) fetchRoomMessages();
   }, [room._id]);
 
   // Listen for new messages and typing events
@@ -126,13 +128,13 @@ const PrivateChatWindow = ({ user, friend, room }) => {
       const handleTyping = (data) => {
         if (data.room === room._id && data.userId !== user.id) {
           setTyping(true);
-          // Hide typing indicator after a delay
           setTimeout(() => setTyping(false), 2000);
         }
       };
 
       socket.on('newMessage', handleNewMessage);
       socket.on('userTyping', handleTyping);
+
       return () => {
         socket.off('newMessage', handleNewMessage);
         socket.off('userTyping', handleTyping);
@@ -140,7 +142,7 @@ const PrivateChatWindow = ({ user, friend, room }) => {
     }
   }, [socket, room._id, user.id]);
 
-  // Auto-scroll to the bottom when messages update.
+  // Auto-scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -159,13 +161,25 @@ const PrivateChatWindow = ({ user, friend, room }) => {
     setNewMessage('');
   };
 
-  // Emit a typing event when the user is entering text
+  // Emit typing event when user types
   const handleTypingEvent = () => {
     socket.emit('typing', { room: room._id, userId: user.id });
   };
 
+  // Send on Ctrl+Enter shortcut
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [newMessage]);
+
   return (
-    <div className="chat-window flex flex-col h-full bg-white shadow-lg">
+    <div className="chat-window flex flex-col h-full bg-gray-50 dark:bg-gray-900 p-4 gap-2 rounded-xl shadow-lg">
       {loading ? (
         <div className="flex justify-center items-center h-full">
           <ProgressSpinner className="w-12 h-12" />
@@ -173,32 +187,39 @@ const PrivateChatWindow = ({ user, friend, room }) => {
       ) : (
         <>
           {/* Chat Header */}
-          <div className="p-4 bg-blue-600 text-white shadow-md">
+          <div className="flex items-center gap-3 p-4 bg-blue-600 text-white rounded-xl shadow-sm">
+            <i className="pi pi-comments text-2xl" />
             <h2 className="text-xl font-bold">Chat with {friend.name}</h2>
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             {messages.length === 0 ? (
-              <p className="text-center text-gray-500">No messages yet. Start the conversation!</p>
+              <p className="text-center text-gray-500 dark:text-gray-300">
+                No messages yet. Start the conversation!
+              </p>
             ) : (
               messages.map((msg) => (
                 <div
                   key={msg._id || uuidv4()}
-                  className={`p-3 rounded-lg max-w-md shadow ${
-                    msg.sender.id === user.id
+                  className={`p-3 rounded-lg max-w-md shadow-sm ${msg.sender.id === user.id
                       ? 'self-end bg-blue-500 text-white'
                       : 'self-start bg-gray-200 text-gray-800'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <strong>{msg.sender.name}</strong>
+                    <strong className="text-sm">{msg.sender.name}</strong>
                     <small className="text-xs opacity-75">
                       {msg.timestamp &&
                         formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true })}
                     </small>
                   </div>
-                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.content) }} />
+                  <div
+                    className="text-sm break-words"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(msg.content),
+                    }}
+                  />
                 </div>
               ))
             )}
@@ -213,23 +234,30 @@ const PrivateChatWindow = ({ user, friend, room }) => {
           </div>
 
           {/* Message Input */}
-          <div className="p-4 bg-gray-100 border-t flex flex-col">
+          <div
+            className={`p-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-all ${newMessage ? 'ring-2 ring-blue-500' : ''
+              }`}
+          >
             <Editor
               value={newMessage}
               onTextChange={(e) => {
                 setNewMessage(e.htmlValue || '');
                 handleTypingEvent();
               }}
+              headerTemplate={header}
               placeholder="Write your message..."
               style={{ height: '120px', border: 'none', boxShadow: 'none' }}
             />
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-between items-center p-2">
+              <small className="text-gray-500 dark:text-gray-400">
+                Press Ctrl+Enter to send
+              </small>
               <Button
                 label="Send"
                 icon="pi pi-send"
+                className="p-button-primary"
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim()}
-                className="p-button-raised p-button-rounded p-button-info"
               />
             </div>
           </div>
@@ -239,19 +267,26 @@ const PrivateChatWindow = ({ user, friend, room }) => {
   );
 };
 
-
 // ------------------------
 // Parent FriendChatSystem Component
 // ------------------------
-// When a friend is selected, check if a private room exists between the current user and that friend.
-// If not, create a new room; then render the chat window using the room ID.
 const FriendChatSystem = () => {
   const [user, setUser] = useState({ id: '', name: '' });
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const socket = useSocket();
 
-  // Join the user's personal room for direct messages on mount.
+  // Detect mobile view on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Join the user's personal room on mount.
   useEffect(() => {
     if (socket && user.id) {
       socket.emit('joinUserRoom', user.id);
@@ -267,7 +302,7 @@ const FriendChatSystem = () => {
     }
   }, []);
 
-  // When a friend is selected, check for an existing private room and create one if needed.
+  // When a friend is selected, check for an existing private room or create a new one.
   const handleSelectFriend = async (friend) => {
     setSelectedFriend(friend);
     if (!user.id || !friend.id) return;
@@ -275,7 +310,7 @@ const FriendChatSystem = () => {
     try {
       // Fetch all chatrooms for the current user.
       const rooms = await api.getRooms(user.id);
-      // Look for a private room that has both the current user and the selected friend.
+      // Look for a private room that includes both the current user and the selected friend.
       const existingRoom = rooms.find(
         (room) =>
           room.type === 'private' &&
@@ -303,31 +338,69 @@ const FriendChatSystem = () => {
     }
   };
 
-  return (
-    <div className="friend-chat-system flex h-screen">
-      {/* Left Sidebar: Friend List */}
-      <div className="w-1/4 border-r overflow-y-auto">
-        {user.id && (
-          <FriendList
-            userId={user.id}
-            onSelectFriend={handleSelectFriend}
-            selectedFriendId={selectedFriend?.id}
-          />
-        )}
-      </div>
+  // Back button for mobile view
+  const handleBackToFriends = () => {
+    setSelectedFriend(null);
+    setSelectedRoom(null);
+  };
 
-      {/* Right Panel: Chat Window */}
-      <div className="w-3/4">
+  if (isMobile) {
+    // Mobile view: show friend list or chat window
+    return (
+      <div className="friend-chat-system h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
         {selectedRoom ? (
-          <PrivateChatWindow user={user} friend={selectedFriend} room={selectedRoom} />
+          <div className="h-full flex flex-col">
+            <div className="p-4 bg-blue-600 text-white flex items-center">
+              <Button
+                label="Back"
+                icon="pi pi-arrow-left"
+                className="p-button-text"
+                onClick={handleBackToFriends}
+              />
+              <h2 className="ml-2 text-xl font-bold">Chat with {selectedFriend.name}</h2>
+            </div>
+            <div className="flex-1">
+              <PrivateChatWindow user={user} friend={selectedFriend} room={selectedRoom} />
+            </div>
+          </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-lg text-gray-500">
-            Please select a friend to chat with.
+          <div className="flex-1 overflow-y-auto p-4">
+            {user.id && (
+              <FriendList
+                userId={user.id}
+                onSelectFriend={handleSelectFriend}
+                selectedFriendId={selectedFriend?.id}
+              />
+            )}
           </div>
         )}
       </div>
-    </div>
-  );
+    );
+  } else {
+    // Desktop view: show friend list and chat side by side
+    return (
+      <div className="friend-chat-system flex h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="w-1/4 border-r overflow-y-auto p-4">
+          {user.id && (
+            <FriendList
+              userId={user.id}
+              onSelectFriend={handleSelectFriend}
+              selectedFriendId={selectedFriend?.id}
+            />
+          )}
+        </div>
+        <div className="w-3/4">
+          {selectedRoom ? (
+            <PrivateChatWindow user={user} friend={selectedFriend} room={selectedRoom} />
+          ) : (
+            <div className="flex items-center justify-center h-full text-lg text-gray-500 dark:text-gray-300">
+              Please select a friend to chat with.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 };
 
 export default FriendChatSystem;

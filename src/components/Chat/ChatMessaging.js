@@ -19,7 +19,17 @@ const ChatMessaging = ({ selectedRoom }) => {
   const socket = useSocket();
   const messagesEndRef = useRef(null);
   const [isEditorFocused, setIsEditorFocused] = useState(false);
+  const renderHeader = () => {
+    return (
+      <span className="ql-formats">
+        <button className="ql-bold" aria-label="Bold"></button>
+        <button className="ql-italic" aria-label="Italic"></button>
+        <button className="ql-underline" aria-label="Underline"></button>
+      </span>
+    );
+  };
 
+  const header = renderHeader();
   // Decode token to retrieve user details
   useEffect(() => {
     const token = getToken();
@@ -252,6 +262,7 @@ const ChatMessaging = ({ selectedRoom }) => {
             border: 'none',
             boxShadow: 'none',
           }}
+          headerTemplate={header}
           onFocus={() => setIsEditorFocused(true)}
           onBlur={() => setIsEditorFocused(false)}
         />

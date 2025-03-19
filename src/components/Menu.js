@@ -1,25 +1,17 @@
-// Menu.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getRole, logout } from '../services/authService';
 
-const Menu = ({ mobileMenuOpen, toggleMobileMenu }) => {
+const Menu = () => {
   const [role, setRole] = useState(null);
   const [activeGroup, setActiveGroup] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const timerRef = useRef(null);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const fetchedRole = getRole();
     setRole(fetchedRole);
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleLogout = () => {
@@ -39,10 +31,10 @@ const Menu = ({ mobileMenuOpen, toggleMobileMenu }) => {
   const handleMouseLeave = () => {
     timerRef.current = setTimeout(() => {
       setActiveGroup(null);
-    }, 200);
+    }, 200); // Delay before closing the flyout
   };
 
-  // Menu configuration
+  // Menu configuration with corrected icons
   const menuGroups = [
     {
       title: 'Blogs',
@@ -121,8 +113,8 @@ const Menu = ({ mobileMenuOpen, toggleMobileMenu }) => {
             title: 'Page Management',
             icon: 'fas fa-file-alt',
             items: [
-              { path: '/add-aboutus', label: 'About Us' },
               { path: '/add-home', label: 'Home Page' },
+              { path: '/add-aboutus', label: 'About Us' },
               { path: '/add-footer', label: 'Footer' },
             ],
           },
@@ -130,113 +122,130 @@ const Menu = ({ mobileMenuOpen, toggleMobileMenu }) => {
       : []),
   ];
 
-  const activeGroupObj = menuGroups.find((group) => group.title === activeGroup);
+  // Adjust main content margin based on menu state
+  const mainContentMarginLeft = () => {
+    if (!isCollapsed) return '16rem'; // expanded sidebar (w-64)
+    if (isCollapsed && activeGroup) return '17rem'; // collapsed + flyout open
+    return '5rem'; // collapsed with no flyout
+  };
 
-  // Sidebar content shared between mobile and desktop
-  const sidebarContent = (
-    <>
-      <button
-        onClick={() => {
-          if (!isCollapsed) setActiveGroup(null);
-          setIsCollapsed(!isCollapsed);
-        }}
-        className="mb-4 p-2 bg-gray-700 hover:bg-gray-600 rounded w-full flex items-center justify-center"
-        title={isCollapsed ? 'Expand Menu' : 'Collapse Menu'}
+  return (
+    <div className="">
+      {/* Sidebar */}
+      <div
+        className={`bg-gray-800 text-white p-4 fixed left-0 top-0 h-full transition-all duration-300 ${
+          isCollapsed ? 'w-20' : 'w-64'
+        } z-40`}
       >
-        <i className={`fas fa-${isCollapsed ? 'arrow-right' : 'arrow-left'}`}></i>
-      </button>
-      {!isCollapsed && (
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Dashboard Menu
-        </h2>
-      )}
-      <div className="space-y-2 overflow-y-auto" style={{ height: 'calc(100% - 160px)' }}>
-        {menuGroups.map((group, index) => (
-          <div
-            key={index}
-            className="group-container"
-            onMouseEnter={
-              isCollapsed ? () => handleMouseEnter(group.title) : undefined
-            }
-            onMouseLeave={isCollapsed ? handleMouseLeave : undefined}
-            onClick={
-              !isCollapsed
-                ? () =>
-                    setActiveGroup(activeGroup === group.title ? null : group.title)
-                : () => {}
-            }
-          >
+        {/* Toggle Button */}
+        <button
+          onClick={() => {
+            if (!isCollapsed) setActiveGroup(null);
+            setIsCollapsed(!isCollapsed);
+          }}
+          className="mb-4 p-2 bg-gray-700 hover:bg-gray-600 rounded w-full flex items-center justify-center"
+          title={isCollapsed ? 'Expand Menu' : 'Collapse Menu'}
+        >
+          <i className={`fas fa-${isCollapsed ? 'arrow-right' : 'arrow-left'}`}></i>
+        </button>
+
+        {/* Dashboard Title (only in expanded mode) */}
+        {!isCollapsed && (
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            Dashboard Menu
+          </h2>
+        )}
+
+        <div className="space-y-2 overflow-y-auto h-[calc(100%-160px)]">
+          {menuGroups.map((group, index) => (
             <div
-              className="flex items-center p-2 hover:bg-gray-700 rounded cursor-pointer transition-transform duration-200 transform hover:scale-105"
-              title={isCollapsed ? group.title : ''}
+              key={index}
+              className="group-container relative"
+              onMouseEnter={isCollapsed ? () => handleMouseEnter(group.title) : undefined}
+              onMouseLeave={isCollapsed ? handleMouseLeave : undefined}
+              onClick={
+                !isCollapsed
+                  ? () =>
+                      setActiveGroup(activeGroup === group.title ? null : group.title)
+                  : () => {}
+              }
             >
-              <i className={`${group.icon} w-5 mr-3 text-center`}></i>
-              {!isCollapsed && <span>{group.title}</span>}
-            </div>
-            {!isCollapsed && (
               <div
-                className={`transition-all duration-300 overflow-hidden ${
-                  activeGroup === group.title ? 'max-h-96' : 'max-h-0'
-                }`}
+                className="flex items-center p-2 hover:bg-gray-700 rounded cursor-pointer transition-transform duration-200 transform hover:scale-105"
+                title={isCollapsed ? group.title : ''}
               >
-                <ul className="pl-8 py-1">
-                  {group.items.map((item, itemIndex) => (
-                    <li key={itemIndex}>
-                      <Link
-                        to={item.path}
-                        className="block p-2 text-sm hover:bg-gray-700 rounded"
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <i className={`${group.icon} w-5 mr-3 text-center`}></i>
+                {!isCollapsed && <span>{group.title}</span>}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <button
-        onClick={handleLogout}
-        className="w-full p-2 bg-red-600 hover:bg-red-700 rounded text-white mt-4 flex items-center justify-center transition-transform duration-200 transform hover:scale-105"
-      >
-        <i className="fas fa-sign-out-alt mr-2"></i>
-        {!isCollapsed && <span>Logout</span>}
-      </button>
-    </>
-  );
-
-  // Define sidebar classes based on collapsed state
-  const sidebarClass = `bg-gray-800 text-white p-4 fixed top-0 h-full transition-all duration-300 z-40 ${
-    isCollapsed ? 'w-20' : 'w-64'
-  }`;
-
-  // For mobile: render as overlay with a backdrop when mobileMenuOpen is true
-  if (windowWidth < 768) {
-    return mobileMenuOpen ? (
-      <div className="md:hidden">
-        <div className={sidebarClass}>
-          {/* Mobile close button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="mb-4 p-2 bg-gray-700 hover:bg-gray-600 rounded w-full flex items-center justify-center"
-          >
-            <i className="fas fa-times"></i>
-          </button>
-          {sidebarContent}
+              {/* Inline submenu for expanded mode */}
+              {!isCollapsed && (
+                <div
+                  className={`transition-all duration-300 overflow-hidden ${
+                    activeGroup === group.title ? 'max-h-96' : 'max-h-0'
+                  }`}
+                >
+                  <ul className="pl-8 py-1">
+                    {group.items.map((item, itemIndex) => (
+                      <li key={itemIndex}>
+                        <Link
+                          to={item.path}
+                          className="block p-2 text-sm hover:bg-gray-700 rounded"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        {/* Backdrop */}
-        <div
-          onClick={toggleMobileMenu}
-          className="fixed inset-0 bg-black opacity-50 z-30"
-        ></div>
-      </div>
-    ) : null;
-  }
 
-  // For desktop: render sidebar permanently
-  return <div className={sidebarClass}>{sidebarContent}</div>;
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full p-2 bg-red-600 hover:bg-red-700 rounded text-white mt-4 flex items-center justify-center transition-transform duration-200 transform hover:scale-105"
+        >
+          <i className="fas fa-sign-out-alt mr-2"></i>
+          {!isCollapsed && <span>Logout</span>}
+        </button>
+      </div>
+
+      {/* Flyout Submenu for Collapsed Mode */}
+      {isCollapsed && activeGroup && (
+        <div
+          className="bg-gray-800 text-white p-4 fixed top-0 left-20 h-full w-48 transition-all duration-300 z-50"
+          onMouseEnter={() => handleMouseEnter(activeGroup)}
+          onMouseLeave={handleMouseLeave}
+        >
+          <h2 className="text-lg font-semibold mb-4">{activeGroup}</h2>
+          <ul>
+            {menuGroups
+              .find((group) => group.title === activeGroup)
+              ?.items.map((item, index) => (
+                <li key={index} className="mb-2">
+                  <Link
+                    to={item.path}
+                    className="block p-2 text-sm hover:bg-gray-700 rounded"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div
+        className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300"
+        style={{ marginLeft: mainContentMarginLeft() }}
+      >
+        {/* Layout content renders here */}
+      </div>
+    </div>
+  );
 };
 
 export default Menu;
-//test

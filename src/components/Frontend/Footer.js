@@ -57,7 +57,7 @@ const Footer = () => {
             <div className="mb-4">
               {footer.mainImage && (
                 <img
-                  src={`http://localhost:5000${footer.mainImage}`}
+                  src={footer.mainImage}
                   alt="Company Logo"
                   className="h-16"
                 />

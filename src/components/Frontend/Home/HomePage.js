@@ -52,7 +52,7 @@ const HomePage = () => {
       <div className="relative mb-12">
         {home.hero.backgroundImage && (
           <img
-            src={`http://localhost:5000${home.hero.backgroundImage}`}
+            src={home.hero.backgroundImage}
             alt="Hero Background"
             className="w-full h-96 object-cover rounded"
           />
@@ -75,7 +75,7 @@ const HomePage = () => {
       <div className="flex flex-col md:flex-row items-center mb-12">
         {home.about.image && (
           <img
-            src={`http://localhost:5000${home.about.image}`}
+            src={home.about.image}
             alt="About"
             className="w-full md:w-1/2 rounded shadow-lg mb-4 md:mb-0"
           />
@@ -121,7 +121,7 @@ const HomePage = () => {
               <div key={index} className="group relative overflow-hidden rounded shadow-lg">
                 {item.image && (
                   <img
-                    src={`http://localhost:5000${item.image}`}
+                    src={item.image}
                     alt={item.alt || item.title}
                     className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
                   />
