@@ -1,7 +1,6 @@
 // Layout.js
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { SpeedInsights } from "@vercel/speed-insights/react"
 import Menu from './Menu';
 import { EmployeeProvider } from './context/EmployeeContext';
 import { ThemeProvider } from './context/ThemeContext';

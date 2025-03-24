@@ -9,6 +9,8 @@ import SocketProvider from './services/SocketContext';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import { SpeedInsights } from "@vercel/speed-insights/react"
+
 import { getToken, isTokenExpired, logout } from './services/authService';
 
 const TokenExpirationHandler = () => {
