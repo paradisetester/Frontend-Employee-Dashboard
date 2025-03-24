@@ -53,6 +53,7 @@ const AppRoutes = () => {
           }
         />
       </Routes>
+      <SpeedInsights/>
     </SocketProvider>
   );
 };
