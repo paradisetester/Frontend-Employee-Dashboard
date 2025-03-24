@@ -30,6 +30,7 @@ import EmployeeDashboard from './EmployeeDashboard';
 import FriendChatSystem from './Friend Requests/FriendChatSystem';
 import HomePage from './Frontend/Home/HomePage';
 import FriendList from './Friend Requests/FriendList';
+import ContactEntriesList from './Pages/Contact Us/ContactFormEntries';
 
 const Header = ({ toggleMobileMenu }) => {
   return (
@@ -119,6 +120,7 @@ const Layout = () => {
                 <Route path="/add-aboutus" element={<AboutUsForm />} />
                 <Route path="/add-home" element={<HomePageForm />} />
                 <Route path="/add-footer" element={<FooterForm />} />
+                <Route path="/entries" element={<ContactEntriesList />} />
 
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />

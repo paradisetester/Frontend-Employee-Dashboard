@@ -15,7 +15,6 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getToken();
-    console.log('Token being sent:', token); // Debug log for frontend
 
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -538,6 +537,37 @@ const api = {
       handleError(error);
     }
   },
+
+
+ /** 📝 Contact Form Management **/
+
+ newEntry: async (formData) => {
+  try {
+    const response = await axiosInstance.post('/contactform/add-entry', formData);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+},
+getEntries: async () => {
+  try {
+    const response = await axiosInstance.get('/contactform/get-entries');
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+},
+  // Delete a comment or reply
+  deleteEntry: async (entryID) => {
+    try {
+      const response = await axiosInstance.delete(`/contactform/delete-entry/${entryID}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to delete comment:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   /** 📝 Friend Requests Management **/
 
   // Send a friend request

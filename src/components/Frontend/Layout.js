@@ -7,6 +7,7 @@ import BlogsList from './Blogs/BlogsList'; // Import BlogsList component
 import AboutPage from './About/About';
 import HomePage from './Home/HomePage';
 import Footer from './Footer';
+import ContactUs from './Contact Us/ContactUs';
 
 const PublicLayout = () => {
   return (
@@ -18,6 +19,7 @@ const PublicLayout = () => {
           <Route index element={<HomePage />} />
           <Route path="blogs" element={<BlogsList />} />
           <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactUs />} />
           {/* Additional public routes can be added here */}
           <Route path="*" element={<NotFound />} /> {/* Fallback route */}
         </Routes>

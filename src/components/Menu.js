@@ -116,6 +116,7 @@ const Menu = () => {
               { path: '/add-home', label: 'Home Page' },
               { path: '/add-aboutus', label: 'About Us' },
               { path: '/add-footer', label: 'Footer' },
+              { path: '/entries', label: 'Contact Form Entries' },
             ],
           },
         ]
