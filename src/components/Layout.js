@@ -1,10 +1,10 @@
 // Layout.js
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { SpeedInsights } from "@vercel/speed-insights/react"
 import Menu from './Menu';
 import { EmployeeProvider } from './context/EmployeeContext';
 import { ThemeProvider } from './context/ThemeContext';
-
 // Import your page components
 import AddBlogPage from './Blogs/Blog';
 import BlogsList from './Blogs/BlogList';
@@ -43,7 +43,7 @@ const Header = ({ toggleMobileMenu }) => {
         >
           <i className="fas fa-bars text-2xl"></i>
         </button>
-        <Link to="/" className="text-xl font-semibold text-gray-800 hover:underline">
+        <Link to="/" className="text-xl font-semibold text-gray-800 hover:underline text-left">
           Employee Dashboard
         </Link>
       </div>
