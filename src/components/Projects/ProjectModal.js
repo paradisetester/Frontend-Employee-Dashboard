@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 const ProjectModal = ({ project, tasks, onClose }) => {
   const [activeTab, setActiveTab] = useState('details'); // 'details' or 'tasks'
-
+  console.log(project, 'project');
   if (!project) return null;
 
   return (
@@ -24,17 +24,15 @@ const ProjectModal = ({ project, tasks, onClose }) => {
         <div className="flex border-b bg-gray-50">
           <button
             onClick={() => setActiveTab('details')}
-            className={`px-4 py-2 w-1/2 text-center ${
-              activeTab === 'details' ? 'bg-blue-500 text-white font-semibold' : 'bg-gray-100'
-            }`}
+            className={`px-4 py-2 w-1/2 text-center ${activeTab === 'details' ? 'bg-blue-500 text-white font-semibold' : 'bg-gray-100'
+              }`}
           >
             Project Details
           </button>
           <button
             onClick={() => setActiveTab('tasks')}
-            className={`px-4 py-2 w-1/2 text-center ${
-              activeTab === 'tasks' ? 'bg-blue-500 text-white font-semibold' : 'bg-gray-100'
-            }`}
+            className={`px-4 py-2 w-1/2 text-center ${activeTab === 'tasks' ? 'bg-blue-500 text-white font-semibold' : 'bg-gray-100'
+              }`}
           >
             Tasks
           </button>
@@ -52,7 +50,9 @@ const ProjectModal = ({ project, tasks, onClose }) => {
                 <p><strong>Email:</strong> {project.email || 'N/A'}</p>
                 <p><strong>Start Date:</strong> {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}</p>
                 <p><strong>End Date:</strong> {project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}</p>
-                <p><strong>Assigned To:</strong> {project.assignedto?.join(', ') || 'N/A'}</p>
+                <p><strong>Assigned To:</strong> {project.assignedto && project.assignedto.length > 0
+                  ? project.assignedto.map(user => user.name).join(', ')
+                  : 'N/A'}</p>
                 <p><strong>Created At:</strong> {new Date(project.createdAt).toLocaleDateString()}</p>
               </div>
               <div className="mt-4">
