@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/axios';
-import EditEmployee from './EditEmployee'; // Your existing edit modal component
+import EditEmployee from './EditEmployee';
+import MoreDetails from './MoreDetails';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { FilterMatchMode } from 'primereact/api';
-import { FiSearch, FiPlus, FiEdit, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiEdit, FiTrash2, FiEye, FiAlertTriangle } from 'react-icons/fi';
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
@@ -16,6 +17,8 @@ const EmployeeList = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
+  const [detailsEmployee, setDetailsEmployee] = useState(null);
 
   useEffect(() => {
     fetchEmployees();
@@ -23,7 +26,7 @@ const EmployeeList = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await api.getEmployees(); // Fetch employees from API
+      const response = await api.getEmployees();
       setEmployees(response);
     } catch (err) {
       console.error('Error fetching employees:', err);
@@ -32,7 +35,7 @@ const EmployeeList = () => {
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    let _filters = { ...filters };
+    const _filters = { ...filters };
     _filters.global.value = value;
     setFilters(_filters);
     setGlobalFilterValue(value);
@@ -48,11 +51,16 @@ const EmployeeList = () => {
     setShowDeleteModal(true);
   };
 
+  const handleMoreDetailsClick = (employee) => {
+    setDetailsEmployee(employee);
+    setShowMoreDetails(true);
+  };
+
   const handleDeleteEmployee = async () => {
     try {
-      await api.deleteEmployee(employeeToDelete._id); // Delete employee via API
-      fetchEmployees(); // Refresh employee list
-      setShowDeleteModal(false); // Close delete modal
+      await api.deleteEmployee(employeeToDelete._id);
+      fetchEmployees();
+      setShowDeleteModal(false);
       alert('Employee deleted successfully!');
     } catch (err) {
       console.error('Error deleting employee:', err);
@@ -70,36 +78,51 @@ const EmployeeList = () => {
     setEmployeeToDelete(null);
   };
 
-  // Body template for the department column (adds some styling)
-  const departmentBodyTemplate = (rowData) => {
-    return (
-      <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
-        {rowData.department}
-      </span>
-    );
+  const handleCloseMoreDetails = () => {
+    setShowMoreDetails(false);
+    setDetailsEmployee(null);
   };
 
-  // Body template for the actions column (edit & delete buttons)
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="flex gap-2">
-        <button
-          onClick={() => handleEditClick(rowData)}
-          title="Edit"
-          className="p-2 hover:bg-yellow-100 rounded-lg text-yellow-600 hover:text-yellow-700 transition-colors"
-        >
-          <FiEdit size={20} />
-        </button>
-        <button
-          onClick={() => handleDeleteClick(rowData)}
-          title="Delete"
-          className="p-2 hover:bg-red-100 rounded-lg text-red-600 hover:text-red-700 transition-colors"
-        >
-          <FiTrash2 size={20} />
-        </button>
-      </div>
-    );
-  };
+  // Template for profile picture column
+  const profilePictureTemplate = (rowData) => (
+    <img
+      src={rowData.profilepicture}
+      alt={rowData.name}
+      className="w-10 h-10 rounded-full object-cover"
+    />
+  );
+
+  const departmentBodyTemplate = (rowData) => (
+    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
+      {rowData.department}
+    </span>
+  );
+
+  const actionBodyTemplate = (rowData) => (
+    <div className="flex gap-2">
+      <button
+        onClick={() => handleEditClick(rowData)}
+        title="Edit"
+        className="p-2 hover:bg-yellow-100 rounded-lg text-yellow-600 hover:text-yellow-700 transition-colors"
+      >
+        <FiEdit size={20} />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(rowData)}
+        title="Delete"
+        className="p-2 hover:bg-red-100 rounded-lg text-red-600 hover:text-red-700 transition-colors"
+      >
+        <FiTrash2 size={20} />
+      </button>
+      <button
+        onClick={() => handleMoreDetailsClick(rowData)}
+        title="More Details"
+        className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 hover:text-blue-700 transition-colors"
+      >
+        <FiEye size={20} />
+      </button>
+    </div>
+  );
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -123,7 +146,6 @@ const EmployeeList = () => {
         </button>
       </div>
 
-      {/* PrimeReact DataTable */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <DataTable
           value={employees}
@@ -132,11 +154,13 @@ const EmployeeList = () => {
           removableSort
           filters={filters}
           columnResizeMode="expand"
-          resizableColumns showGridlines 
+          resizableColumns
+          showGridlines
           globalFilterFields={['name', 'email', 'position', 'department']}
           emptyMessage={`No employees found${globalFilterValue ? ` matching "${globalFilterValue}"` : ''}`}
           className="p-datatable-customers"
         >
+          <Column header="Profile" body={profilePictureTemplate} />
           <Column field="name" header="Name" sortable />
           <Column field="email" header="Email" sortable />
           <Column field="position" header="Position" sortable />
@@ -145,7 +169,6 @@ const EmployeeList = () => {
         </DataTable>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-pop-in">
@@ -155,8 +178,7 @@ const EmployeeList = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Delete Employee</h3>
               <p className="text-gray-600">
-                Are you sure you want to delete{' '}
-                <span className="font-medium">{employeeToDelete?.name}</span>? This action cannot be undone.
+                Are you sure you want to delete <span className="font-medium">{employeeToDelete?.name}</span>? This action cannot be undone.
               </p>
             </div>
             <div className="flex justify-end gap-3">
@@ -177,13 +199,16 @@ const EmployeeList = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
-      {showEditModal && (
+      {showEditModal && selectedEmployee && (
         <EditEmployee
           employee={selectedEmployee}
           onClose={handleCloseEditModal}
           onSave={fetchEmployees}
         />
+      )}
+
+      {showMoreDetails && detailsEmployee && (
+        <MoreDetails employee={detailsEmployee} onClose={handleCloseMoreDetails} />
       )}
     </div>
   );

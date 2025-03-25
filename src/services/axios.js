@@ -53,13 +53,20 @@ const api = {
   },
 
   updateEmployee: async (employeeId, employeeData) => {
-    try {
-      const response = await axiosInstance.put(`/auth/update-profile/${employeeId}`, employeeData);
-      return response.data;
-    } catch (error) {
-      handleError(error);
-    }
-  },
+  try {
+    const response = await axiosInstance.put(
+      `/auth/update-profile/${employeeId}`,
+      employeeData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Explicitly set for file uploads
+        },
+      });
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+},
   // Fetch the logged-in employee's profile
   getProfile: async () => {
     try {

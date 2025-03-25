@@ -58,7 +58,7 @@ const ProjectList = () => {
 
   // Fetch tasks for a specific project
   const fetchTasksForProject = async (project) => {
-    setLoading(true);
+    // setLoading(true);   // Remove setLoading(true) to prevent loading state from showing
     try {
       const response = await api.getTasks();
       const allTasks = response || [];

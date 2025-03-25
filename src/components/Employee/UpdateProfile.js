@@ -11,7 +11,37 @@ const UpdateProfile = () => {
     salary: '',
     position: '',
     department: '',
+    // Personal details
+    personalLocation: '',
+    personalDob: '',
+    personalGender: 'male',
+    personalMaritalStatus: 'single',
+    personalNationality: '',
+    // Address
+    addressStreet: '',
+    addressCity: '',
+    addressState: '',
+    addressZipCode: '',
+    addressCountry: '',
+    // Contact
+    contactPrimary: '',
+    contactSecondary: '',
+    // Emergency Contact
+    emergencyName: '',
+    emergencyPhone: '',
+    emergencyRelationship: '',
+    // Identification
+    identificationNationalId: '',
+    identificationPassportNumber: '',
+    // Social Profiles
+    socialLinkedIn: '',
+    socialTwitter: '',
+    // Current profile picture URL
+    profilepicture: '',
   });
+
+  // For updating profile picture file (if a new file is selected)
+  const [profilePicFile, setProfilePicFile] = useState(null);
 
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +56,9 @@ const UpdateProfile = () => {
         navigate('/login');
         return;
       }
-
       try {
         const response = await api.getProfile();
+        // Assuming response is the employee object.
         setFormData({
           name: response.name || '',
           email: response.email || '',
@@ -36,6 +66,26 @@ const UpdateProfile = () => {
           salary: response.salary || '',
           position: response.position || '',
           department: response.department || '',
+          personalLocation: response.personaldetails?.location || '',
+          personalDob: response.personaldetails?.dob ? response.personaldetails.dob.substring(0, 10) : '',
+          personalGender: response.personaldetails?.gender || 'male',
+          personalMaritalStatus: response.personaldetails?.maritalStatus || 'single',
+          personalNationality: response.personaldetails?.nationality || '',
+          addressStreet: response.address?.street || '',
+          addressCity: response.address?.city || '',
+          addressState: response.address?.state || '',
+          addressZipCode: response.address?.zipCode || '',
+          addressCountry: response.address?.country || '',
+          contactPrimary: response.contact?.primaryPhone || '',
+          contactSecondary: response.contact?.secondaryPhone || '',
+          emergencyName: response.emergencyContact?.name || '',
+          emergencyPhone: response.emergencyContact?.phone || '',
+          emergencyRelationship: response.emergencyContact?.relationship || '',
+          identificationNationalId: response.identification?.nationalId || '',
+          identificationPassportNumber: response.identification?.passportNumber || '',
+          socialLinkedIn: response.socialProfiles?.linkedIn || '',
+          socialTwitter: response.socialProfiles?.twitter || '',
+          profilepicture: response.profilepicture || '',
         });
       } catch (error) {
         console.error('Failed to fetch user details:', error);
@@ -50,10 +100,15 @@ const UpdateProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
-    // Clear errors when user starts typing
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (error) setError('');
     if (successMessage) setSuccessMessage('');
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setProfilePicFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -69,10 +124,73 @@ const UpdateProfile = () => {
     }
 
     try {
+      // Create FormData to handle file upload and nested objects.
+      const data = new FormData();
+
+      // Append basic fields
+      data.append('name', formData.name);
+      data.append('email', formData.email);
+      data.append('age', formData.age);
+      data.append('salary', formData.salary);
+      data.append('position', formData.position);
+      data.append('department', formData.department);
+
+      // Build nested objects and append as JSON strings
+      const personaldetails = {
+        location: formData.personalLocation,
+        dob: formData.personalDob,
+        gender: formData.personalGender,
+        maritalStatus: formData.personalMaritalStatus,
+        nationality: formData.personalNationality,
+      };
+      data.append('personaldetails', JSON.stringify(personaldetails));
+
+      const address = {
+        street: formData.addressStreet,
+        city: formData.addressCity,
+        state: formData.addressState,
+        zipCode: formData.addressZipCode,
+        country: formData.addressCountry,
+      };
+      data.append('address', JSON.stringify(address));
+
+      const contact = {
+        primaryPhone: formData.contactPrimary,
+        secondaryPhone: formData.contactSecondary,
+      };
+      data.append('contact', JSON.stringify(contact));
+
+      const emergencyContact = {
+        name: formData.emergencyName,
+        phone: formData.emergencyPhone,
+        relationship: formData.emergencyRelationship,
+      };
+      data.append('emergencyContact', JSON.stringify(emergencyContact));
+
+      const identification = {
+        nationalId: formData.identificationNationalId,
+        passportNumber: formData.identificationPassportNumber,
+      };
+      data.append('identification', JSON.stringify(identification));
+
+      const socialProfiles = {
+        linkedIn: formData.socialLinkedIn,
+        twitter: formData.socialTwitter,
+      };
+      data.append('socialProfiles', JSON.stringify(socialProfiles));
+
+      // Append new profile picture if selected; otherwise, append the current picture URL
+      if (profilePicFile) {
+        data.append('profilepicture', profilePicFile);
+      } else if (formData.profilepicture) {
+        data.append('profilepicture', formData.profilepicture);
+      }
+
+      // Decode token to get user ID (assuming your token payload has an 'id' field)
       const decodedToken = JSON.parse(atob(token.split('.')[1]));
-      await api.updateEmployee(decodedToken.id, formData);
+      await api.updateEmployee(decodedToken.id, data);
       setSuccessMessage('Profile updated successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000); // Auto-hide success message
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.response?.data?.error || 'Server error, please try again later.');
     } finally {
@@ -80,20 +198,29 @@ const UpdateProfile = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12">
-          <div className="mb-10">
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center">
+          <div className="mb-10 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900">
               Update Your Profile
             </h2>
-            <p className="mt-2 text-sm text-gray-600 text-center">
+            <p className="mt-2 text-sm text-gray-600">
               Keep your information up to date
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information */}
             <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
               {[
                 { label: 'Full Name', type: 'text', name: 'name' },
@@ -107,19 +234,298 @@ const UpdateProfile = () => {
                   <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
                     {label}
                   </label>
-                  <div className="relative rounded-md shadow-sm">
-                    <input
-                      id={name}
-                      type={type}
-                      name={name}
-                      value={formData[name]}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                      placeholder={`Enter ${label.toLowerCase()}`}
-                    />
-                  </div>
+                  <input
+                    id={name}
+                    type={type}
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder={`Enter ${label.toLowerCase()}`}
+                  />
                 </div>
               ))}
+            </div>
+
+            {/* Personal Details */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Personal Details</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                  <input
+                    type="text"
+                    name="personalLocation"
+                    value={formData.personalLocation}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter location"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                  <input
+                    type="date"
+                    name="personalDob"
+                    value={formData.personalDob}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                  <select
+                    name="personalGender"
+                    value={formData.personalGender}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                  <select
+                    name="personalMaritalStatus"
+                    value={formData.personalMaritalStatus}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                  >
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="divorced">Divorced</option>
+                    <option value="widowed">Widowed</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nationality</label>
+                  <input
+                    type="text"
+                    name="personalNationality"
+                    value={formData.personalNationality}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter nationality"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Address</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Street</label>
+                  <input
+                    type="text"
+                    name="addressStreet"
+                    value={formData.addressStreet}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter street"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <input
+                    type="text"
+                    name="addressCity"
+                    value={formData.addressCity}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter city"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                  <input
+                    type="text"
+                    name="addressState"
+                    value={formData.addressState}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter state"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
+                  <input
+                    type="text"
+                    name="addressZipCode"
+                    value={formData.addressZipCode}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter zip code"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                  <input
+                    type="text"
+                    name="addressCountry"
+                    value={formData.addressCountry}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter country"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Contact Information</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Primary Phone</label>
+                  <input
+                    type="text"
+                    name="contactPrimary"
+                    value={formData.contactPrimary}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter primary phone"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Secondary Phone</label>
+                  <input
+                    type="text"
+                    name="contactSecondary"
+                    value={formData.contactSecondary}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter secondary phone"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Contact */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Emergency Contact</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="emergencyName"
+                    value={formData.emergencyName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter emergency contact name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                  <input
+                    type="text"
+                    name="emergencyPhone"
+                    value={formData.emergencyPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter emergency contact phone"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Relationship</label>
+                  <input
+                    type="text"
+                    name="emergencyRelationship"
+                    value={formData.emergencyRelationship}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter relationship"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Identification */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Identification</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">National ID</label>
+                  <input
+                    type="text"
+                    name="identificationNationalId"
+                    value={formData.identificationNationalId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter national ID"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Passport Number</label>
+                  <input
+                    type="text"
+                    name="identificationPassportNumber"
+                    value={formData.identificationPassportNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter passport number"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Social Profiles */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Social Profiles</h3>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn</label>
+                  <input
+                    type="text"
+                    name="socialLinkedIn"
+                    value={formData.socialLinkedIn}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter LinkedIn URL"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Twitter</label>
+                  <input
+                    type="text"
+                    name="socialTwitter"
+                    value={formData.socialTwitter}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Enter Twitter URL"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Picture Upload */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-700">Update Profile Picture</h3>
+              <div className="flex items-center gap-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+            {/* Display current profile picture */}
+            <div>
+              <h3 className="text-xl font-medium text-gray-700">Current Profile Picture</h3>
+              {formData.profilepicture ? (
+                <img
+                  src={formData.profilepicture}
+                  alt="Profile"
+                  className="w-32 h-32 object-cover rounded-full"
+                />
+              ) : (
+                <p>No profile picture available.</p>
+              )}
             </div>
 
             {/* Status Messages */}

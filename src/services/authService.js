@@ -12,13 +12,14 @@ const API_URL ="https://backend-s299.onrender.com/api/auth"; // Backend base URL
 export const login = async (email, password) => {
   try {
     const res = await axios.post(`${API_URL}/login`, { email, password });
-    if (res.data?.token) {
-      const { token, role, name, id } = res.data;
-
+    if (res.data?.token && res.data?.employee) {
+      const { token, employee } = res.data;
+      // Extract fields from employee object:
+      const { _id, role, name } = employee;
       localStorage.setItem('token', token);
       localStorage.setItem('role', role || '');
       localStorage.setItem('name', name || '');
-      localStorage.setItem('id', id || '');
+      localStorage.setItem('id', _id || '');
       console.log(res.data, 'Login successful, token and role saved.');
       return res.data;
     } else {

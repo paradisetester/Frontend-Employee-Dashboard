@@ -13,7 +13,7 @@ const Menu = () => {
     const fetchedRole = getRole();
     setRole(fetchedRole);
   }, []);
-
+  console.log(role, 'role');
   const handleLogout = () => {
     logout();
     navigate('/login');
