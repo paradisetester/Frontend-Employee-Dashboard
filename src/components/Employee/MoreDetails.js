@@ -3,7 +3,8 @@ import { FiX } from 'react-icons/fi';
 
 const MoreDetails = ({ employee, onClose }) => {
   if (!employee) return null;
-  
+  const pd= employee.personaldetails;
+  console.log(employee, 'employee');    
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-3xl w-full shadow-xl overflow-y-auto max-h-[90vh]">
@@ -28,9 +29,8 @@ const MoreDetails = ({ employee, onClose }) => {
           {/* Personal Details */}
           <div>
             <h3 className="text-xl font-medium text-gray-700">Personal Details</h3>
-            {employee.personaldetails && employee.personaldetails.length > 0 ? (
-              employee.personaldetails.map((pd, index) => (
-                <div key={index} className="mb-2">
+            {employee.personaldetails ? 
+                <div className="mb-2">
                   <p><strong>Location:</strong> {pd.location}</p>
                   <p>
                     <strong>Date of Birth:</strong> {new Date(pd.dob).toLocaleDateString()}
@@ -39,8 +39,8 @@ const MoreDetails = ({ employee, onClose }) => {
                   <p><strong>Marital Status:</strong> {pd.maritalStatus}</p>
                   <p><strong>Nationality:</strong> {pd.nationality}</p>
                 </div>
-              ))
-            ) : (
+              
+            : (
               <p>No personal details available.</p>
             )}
           </div>

@@ -14,7 +14,7 @@ const EditEmployee = ({ employee, onClose, onSave }) => {
   });
 
   // Nested fields: personal details (we use the first element)
-  const pd = employee.personaldetails && employee.personaldetails[0] ? employee.personaldetails[0] : {};
+  const pd = employee.personaldetails;
   const [personalLocation, setPersonalLocation] = useState(pd.location || '');
   const [dob, setDob] = useState(pd.dob ? pd.dob.substring(0, 10) : ''); // format for input[type=date]
   const [gender, setGender] = useState(pd.gender || 'male');
