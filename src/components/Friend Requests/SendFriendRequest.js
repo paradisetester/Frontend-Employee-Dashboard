@@ -64,7 +64,6 @@ const AddFriendList = () => {
       console.log('Sent friend requests:', requestMapping);
       setSentRequests(requestMapping);
       const friendlistdata = await api.getFriendList(user.id);
-      console.log(friendlistdata, 'full friend list data');
 
       // Ensure friends is always an array
       const friendlistData = Array.isArray(friendlistdata.friendList.friends)
@@ -72,7 +71,6 @@ const AddFriendList = () => {
         : [friendlistdata.friendList.friends];
 
       setFriends(friendlistData);
-      console.log(friends, 'full friend list data');
     } catch (error) {
       console.error('Error fetching sent friend requests:', error);
     }

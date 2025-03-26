@@ -77,7 +77,7 @@ const Layout = () => {
         />
         <div className="md:ml-64">
           <Header toggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)} />
-          {/* <EmployeeProvider> */}
+          <EmployeeProvider>
             <main className="p-4">
               <Routes>
                 {/* Blogs */}
@@ -125,7 +125,7 @@ const Layout = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
-          {/* </EmployeeProvider> */}
+          </EmployeeProvider>
         </div>
       </div>
     </ThemeProvider>

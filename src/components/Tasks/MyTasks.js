@@ -167,7 +167,11 @@ const MyTasks = () => {
                         >
                             &times;
                         </button>
-                        <AddTask onTaskAdded={fetchTasks} projects={projects} />
+                        <AddTask 
+                        onTaskAdded={fetchTasks}
+                        projects={projects} 
+                        onCancel={() => setShowAddTask(false)}  
+                        />
                     </div>
                 </div>
             )}
