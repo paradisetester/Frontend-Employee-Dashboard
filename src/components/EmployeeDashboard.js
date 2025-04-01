@@ -1,35 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
+import api from '../services/axios';
 import EnhancedAnalyticsCard from './Home Page Cards/AnalyticsCard';
 import NotificationsCard from './Home Page Cards/NotificationsCard';
+import EmployeesCard from './Home Page Cards/EmployeesCard';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 const EmployeeDashboard = () => {
-  // Initial grid layout: two cards side by side.
-  const [layout, setLayout] = useState([
-    { i: 'analytics', x: 0, y: 0, w: 6, h: 8 },
-    { i: 'notifications', x: 6, y: 0, w: 6, h: 8 }
-  ]);
   const [notifications, setNotifications] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
+  // Static layout:
+  // Analytics card on the left (8/12 columns) and 
+  // Notifications and Employees cards stacked on the right (each 4/12 columns)
+  const layout = [
+    { i: 'analytics', x: 0, y: 0, w: 8, h: 13 },
+    { i: 'notifications', x: 8, y: 0, w: 4, h: 3 },
+    { i: 'employees', x: 8, y: 5, w: 4, h: 3 },
+  ];
+
+  // Fetch employees.
   useEffect(() => {
-    // Example: show a toast notification on page load
-    toast.info('Welcome to the Employee Dashboard!');
+    const fetchEmployees = async () => {
+      try {
+        const response = await api.getEmployees();
+        setEmployees(response);
+      } catch (err) {
+        console.error('Error fetching employees:', err);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
-    // Fetch notifications from your backend API (modify endpoint as needed)
+  // Fetch notifications and show welcome toast.
+  useEffect(() => {
+    toast.info('Welcome to the Employee Dashboard!');
     fetch('/api/notifications')
       .then((res) => res.json())
       .then((data) => setNotifications(data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Error fetching notifications:', err));
   }, []);
-
-  const onLayoutChange = (newLayout) => {
-    setLayout(newLayout);
-    // Optionally: persist the new layout in localStorage or backend
-  };
 
   return (
     <div className="p-4">
@@ -39,8 +52,7 @@ const EmployeeDashboard = () => {
         cols={12}
         rowHeight={30}
         width={1200}
-        onLayoutChange={onLayoutChange}
-        draggableHandle=".drag-handle" // optional: restrict drag handle
+        draggableHandle=".drag-handle"
       >
         <div key="analytics" className="p-2">
           <EnhancedAnalyticsCard />
@@ -48,8 +60,10 @@ const EmployeeDashboard = () => {
         <div key="notifications" className="p-2">
           <NotificationsCard notifications={notifications} />
         </div>
+        <div key="employees" className="p-2">
+          <EmployeesCard employees={employees} link="/some-link" />
+        </div>
       </GridLayout>
-      {/* Toast container to render react-toastify notifications */}
       <ToastContainer />
     </div>
   );
