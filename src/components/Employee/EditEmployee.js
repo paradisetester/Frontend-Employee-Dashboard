@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../../services/axios';
 
 const EditEmployee = ({ employee, onClose, onSave }) => {
@@ -14,7 +14,7 @@ const EditEmployee = ({ employee, onClose, onSave }) => {
   });
 
   // Nested fields: personal details (we use the first element)
-  const pd = employee.personaldetails;
+  const pd = employee.personaldetails|| {};
   const [personalLocation, setPersonalLocation] = useState(pd.location || '');
   const [dob, setDob] = useState(pd.dob ? pd.dob.substring(0, 10) : ''); // format for input[type=date]
   const [gender, setGender] = useState(pd.gender || 'male');
