@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getRole, logout } from '../services/authService';
 
 const Menu = () => {
@@ -7,12 +7,14 @@ const Menu = () => {
   const [activeGroup, setActiveGroup] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const timerRef = useRef(null);
 
   useEffect(() => {
     const fetchedRole = getRole();
     setRole(fetchedRole);
   }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -129,6 +131,9 @@ const Menu = () => {
     return '5rem'; // collapsed with no flyout
   };
 
+  // Utility function to check active link
+  const isActiveLink = (path) => location.pathname === path;
+
   return (
     <div className="">
       {/* Sidebar */}
@@ -189,7 +194,11 @@ const Menu = () => {
                       <li key={itemIndex}>
                         <Link
                           to={item.path}
-                          className="block p-2 text-sm hover:bg-gray-700 rounded"
+                          className={`block p-2 text-sm rounded hover:bg-gray-700 transition-colors ${
+                            isActiveLink(item.path)
+                              ? 'bg-blue-500 text-white'
+                              : ''
+                          }`}
                         >
                           {item.label}
                         </Link>
@@ -227,7 +236,11 @@ const Menu = () => {
                 <li key={index} className="mb-2">
                   <Link
                     to={item.path}
-                    className="block p-2 text-sm hover:bg-gray-700 rounded"
+                    className={`block p-2 text-sm rounded hover:bg-gray-700 transition-colors ${
+                      isActiveLink(item.path)
+                        ? 'bg-blue-500 text-white'
+                        : ''
+                    }`}
                   >
                     {item.label}
                   </Link>

@@ -5,7 +5,7 @@ import { Column } from 'primereact/column';
 import { FilterMatchMode } from 'primereact/api';
 import { FiSearch } from 'react-icons/fi';
 import { getToken } from '../../services/authService';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const FriendList = () => {
   const [friends, setFriends] = useState([]);
@@ -16,7 +16,7 @@ const FriendList = () => {
   const [user, setUser] = useState({ id: '', name: '' });
   const [loadingFriends, setLoadingFriends] = useState(false);
 
-  // Get current logged-in employee
+  // Get current logged-in user
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -40,7 +40,6 @@ const FriendList = () => {
     setLoadingFriends(true);
     try {
       const friendlistData = await api.getFriendList(user.id);
-      console.log(friendlistData);
       // Assuming friendlistData has the structure: { friendList: { friends: [...] } }
       const friendsArray = Array.isArray(friendlistData.friendList.friends)
         ? friendlistData.friendList.friends
@@ -62,10 +61,55 @@ const FriendList = () => {
   // Template to render friend details
   const friendBodyTemplate = (friend) => {
     return (
-      <div>
-        <strong>{friend.name}</strong>
-        <br />
-        <span>{friend.email}</span>
+      <div className="flex items-center gap-3">
+        <div className="flex-shrink-0">
+          {friend.profilepicture ? (
+            <img
+              src={friend.profilepicture}
+              alt={friend.name}
+              className="w-12 h-12 rounded-full"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://via.placeholder.com/150';
+              }}
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-xl text-gray-500">{friend.name[0]}</span>
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="font-semibold">{friend.name}</div>
+          <div className="text-sm text-gray-500">{friend.position}</div>
+        </div>
+      </div>
+    );
+  };
+
+  // Template to render email
+  const emailBodyTemplate = (friend) => {
+    return (
+      <a href={`mailto:${friend.email}`} className="text-blue-500">
+        {friend.email}
+      </a>
+    );
+  };
+
+  // Template to render social profiles
+  const socialProfilesBodyTemplate = (friend) => {
+    return (
+      <div className="flex gap-2">
+        {friend.socialProfiles?.linkedIn && (
+          <a href={friend.socialProfiles.linkedIn} target="_blank" rel="noopener noreferrer">
+            <i className="pi pi-linkedin text-xl text-blue-700"></i>
+          </a>
+        )}
+        {friend.socialProfiles?.twitter && (
+          <a href={friend.socialProfiles.twitter} target="_blank" rel="noopener noreferrer">
+            <i className="pi pi-twitter text-xl text-blue-400"></i>
+          </a>
+        )}
       </div>
     );
   };
@@ -92,11 +136,15 @@ const FriendList = () => {
           rows={5}
           filters={filters}
           loading={loadingFriends}
-          globalFilterFields={['name', 'email']}
+          globalFilterFields={['name', 'email', 'position']}
           emptyMessage={`No friends found${globalFilterValue ? ` matching "${globalFilterValue}"` : ''}`}
           className="p-datatable-customers"
+          responsiveLayout="scroll"
         >
-          <Column header="Friend" body={friendBodyTemplate} sortable />
+          <Column field="name" header="Friend" body={friendBodyTemplate} sortable />
+          <Column field="email" header="Email" body={emailBodyTemplate} sortable />
+          <Column field="position" header="Position" sortable />
+          <Column field="socialProfiles" header="Social Profiles" body={socialProfilesBodyTemplate} />
         </DataTable>
       </div>
     </div>

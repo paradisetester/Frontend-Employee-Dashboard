@@ -146,7 +146,8 @@ const EmployeeList = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* DataTable container with horizontal scrolling for mobile */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-x-auto">
         <DataTable
           value={employees}
           paginator
@@ -171,7 +172,7 @@ const EmployeeList = () => {
 
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-pop-in">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl animate-pop-in">
             <div className="text-center mb-6">
               <div className="mx-auto bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
                 <FiAlertTriangle className="text-red-600" size={32} />

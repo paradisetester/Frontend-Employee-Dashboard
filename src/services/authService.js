@@ -15,6 +15,7 @@ export const login = async (email, password) => {
     if (res.data?.token && res.data?.employee) {
       const { token, employee } = res.data;
       // Extract fields from employee object:
+      console.log(employee, 'Employee data received.');
       const { _id, role, name } = employee;
       localStorage.setItem('token', token);
       localStorage.setItem('role', role || '');
@@ -38,6 +39,8 @@ export const login = async (email, password) => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
+  localStorage.removeItem('name');
+  localStorage.removeItem('theme');
   console.log('User logged out, token and role removed.');
 };
 
