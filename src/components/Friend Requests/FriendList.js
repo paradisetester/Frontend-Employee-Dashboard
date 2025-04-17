@@ -70,7 +70,7 @@ const FriendList = () => {
               className="w-12 h-12 rounded-full"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/150';
+                e.target.src = 'https://picsum.photos/seed/picsum/200/300';
               }}
             />
           ) : (

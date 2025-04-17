@@ -30,6 +30,7 @@ import FriendChatSystem from './Friend Requests/FriendChatSystem';
 import HomePage from './Frontend/Home/HomePage';
 import FriendList from './Friend Requests/FriendList';
 import ContactEntriesList from './Pages/Contact Us/ContactFormEntries';
+// import PrivateChatWindow from './Friend Chat System/PrivateChatWindow';
 
 const Header = ({ toggleMobileMenu }) => {
   return (

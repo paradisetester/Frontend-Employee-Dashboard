@@ -11,7 +11,8 @@
 # production
 /build
 #Currently in testing
-/Friend Chat System
+src/components/Friend Chat System/
+
 # misc
 .DS_Store
 .env.local
